@@ -521,6 +521,10 @@ body {
   white-space: pre-wrap;
   line-height: 1.8;
   margin-bottom: 1rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-height: none;
+  overflow: visible;
 }
 
 .post-actions-section {
@@ -1144,5 +1148,18 @@ body {
 
   .persona-desc {
     font-size: 0.75rem;
+  }
+
+  .post-preview {
+    padding: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .generated-result {
+    max-height: none;
+    overflow: visible;
   }
 }
