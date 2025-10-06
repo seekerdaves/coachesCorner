@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Whitelist of allowed email addresses
+    // IMPORTANT: Replace these with the actual email addresses you want to allow
+    function isAllowedUser() {
+      return request.auth != null && (
+        request.auth.token.email in [
+          'your-email@gmail.com',           // <- Replace with your email
+          'assistant-coach@gmail.com',       // <- Add more emails as needed
+          // Add more allowed emails here
+        ]
+      );
+    }
+
+    // Users can only read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId
+                         && isAllowedUser();
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

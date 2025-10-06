@@ -1,0 +1,61 @@
+// Type definitions for the Bowling Coach App
+
+export type PostType =
+  | 'Tip of the Day'
+  | 'Motivational'
+  | 'Technique Deep Dive'
+  | 'Team Achievement'
+  | 'Practice Drill'
+  | 'Mental Game'
+  | 'Equipment Advice'
+  | 'Event Announcement'
+  | 'Season Reflection';
+
+export type SkillLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
+
+export type CoachPersonaType =
+  | 'Gen Z'
+  | 'Gen Alpha'
+  | 'Bowling Guru'
+  | 'Professional'
+  | 'USBC Gold Coach'
+  | 'Ball Driller Expert';
+
+export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality';
+
+export interface Resource {
+  id: string;
+  title: string;
+  url: string;
+  category: string;
+  tags: string[];
+  addedDate: string;
+}
+
+export interface GeneratedPost {
+  id: string;
+  content: string;
+  postType: PostType;
+  skillLevel: SkillLevel;
+  topic: string;
+  category: string;
+  generatedDate: string;
+  isUsed: boolean;
+  usedDate?: string;
+  tags: string[];
+}
+
+export interface CoachProfile {
+  name: string;
+  schoolName: string;
+  teamName: string;
+  email?: string;
+  socialHandle?: string;
+}
+
+export interface AppConfig {
+  profile: CoachProfile;
+  resources: Resource[];
+  posts: GeneratedPost[];
+  postHistory: string[]; // IDs of used posts
+}

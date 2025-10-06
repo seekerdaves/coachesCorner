@@ -1,0 +1,14 @@
+# Prevent .env files from being committed even if gitignore fails
+.env filter=git-crypt diff=git-crypt
+.env.local filter=git-crypt diff=git-crypt
+*.env.* filter=git-crypt diff=git-crypt
+
+# Ensure line endings are consistent
+* text=auto
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.md text eol=lf

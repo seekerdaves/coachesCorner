@@ -1,0 +1,20 @@
+🚨 URGENT: DELETE THIS API KEY FROM GOOGLE AI STUDIO
+
+Old Gemini API Key (EXPOSED - DO NOT USE):
+AIzaSyC31lzVqLSGQIVcZ7Osmk654yLiUr1ra8g
+
+Where to delete it:
+https://aistudio.google.com/apikey
+
+Steps:
+1. Click the link above
+2. Sign in to your Google account
+3. Find this key in the list
+4. Click the trash/delete icon
+5. Confirm deletion
+
+Why: This key was in your .env file and should be considered compromised.
+After deletion, users will provide their own API keys via the app.
+
+✅ Already removed from code
+❌ Still needs to be deleted from Google AI Studio
