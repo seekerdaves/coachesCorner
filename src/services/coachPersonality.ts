@@ -153,7 +153,8 @@ export const generateCoachPrompt = (
   persona?: CoachPersonaType,
   platformFormat?: string,
   regenerateStyle?: RegenerateStyle,
-  previousContent?: string
+  previousContent?: string,
+  resourcesContext?: string
 ): string => {
   const selectedPersona = persona ? COACH_PERSONAS.find(p => p.type === persona) : null;
 
@@ -252,6 +253,10 @@ Guidelines for your posts:
 
   const contextSection = additionalContext
     ? `\n\nAdditional Context:\n${additionalContext}\n`
+    : '';
+
+  const resourceSection = resourcesContext
+    ? `\n\n${resourcesContext}\n`
     : '';
 
   // Platform-specific formatting guidelines
@@ -413,7 +418,7 @@ Previous post:\n${previousContent}\n`;
 
   return `${basePersonality}
 
-${guidelines}${platformGuidelines}
+${guidelines}${platformGuidelines}${resourceSection}
 
 Post Type: ${postType}
 Topic: ${topic}${contextSection}${regenerateInstruction}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm install)",
+      "Bash(cat:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then echo \"WARNING: .env file exists\")",
+      "Bash(else echo \".env file does not exist (good)\")",
+      "Bash(fi)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

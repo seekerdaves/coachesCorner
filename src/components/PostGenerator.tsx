@@ -3,6 +3,8 @@ import { generateContent } from '../services/gemini';
 import { generateCoachPrompt, COACH_PERSONAS } from '../services/coachPersonality';
 import type { PostType, SkillLevel, GeneratedPost, CoachPersonaType, RegenerateStyle, PlatformFormat } from '../types';
 import { addPost, loadConfig, getPersonaPreferences } from '../services/storage';
+import { formatPostForPlatform, getPlatformInfo } from '../services/platformFormatter';
+import { fetchMultipleResources, formatResourcesForPrompt } from '../services/resourceFetcher';
 
 interface Props {
   onPostGenerated?: (post: GeneratedPost) => void;
@@ -22,10 +24,12 @@ export function PostGenerator({ onPostGenerated }: Props) {
   const [selectedPersona, setSelectedPersona] = useState<CoachPersonaType>('Next Gen Hotshot');
   const [enabledPersonas, setEnabledPersonas] = useState<CoachPersonaType[]>(COACH_PERSONAS.map(p => p.type));
   const [platformFormat, setPlatformFormat] = useState<PlatformFormat>('standard');
+  const [viewPlatform, setViewPlatform] = useState<PlatformFormat>('standard');
   const [generatedPost, setGeneratedPost] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPersonaSelector, setShowPersonaSelector] = useState(false);
+  const [resourceCount, setResourceCount] = useState(0);
   const [lastGenerateParams, setLastGenerateParams] = useState<{
     postType: PostType;
     topic: string;
@@ -33,12 +37,15 @@ export function PostGenerator({ onPostGenerated }: Props) {
     additionalContext: string;
   } | null>(null);
 
-  // Load persona preferences on mount
+  // Load persona preferences and resource count on mount
   useEffect(() => {
     const prefs = getPersonaPreferences();
     setSelectedPersona(prefs.defaultPersona);
     setEnabledPersonas(prefs.enabledPersonas);
     setPlatformFormat(prefs.defaultPlatformFormat);
+
+    const config = loadConfig();
+    setResourceCount(config.resources?.length || 0);
   }, []);
 
   const handleQuickGenerate = async (template: typeof QUICK_TEMPLATES[0]) => {
@@ -49,6 +56,14 @@ export function PostGenerator({ onPostGenerated }: Props) {
     try {
       const config = loadConfig();
       const audience = `high school bowlers (All Levels)`;
+
+      // Fetch resources if available
+      let resourcesContext = '';
+      if (config.resources && config.resources.length > 0) {
+        const fetchedResources = await fetchMultipleResources(config.resources);
+        resourcesContext = formatResourcesForPrompt(fetchedResources);
+      }
+
       const prompt = generateCoachPrompt(
         template.postType,
         template.topic,
@@ -56,7 +71,10 @@ export function PostGenerator({ onPostGenerated }: Props) {
         '',
         config.profile.name,
         selectedPersona,
-        platformFormat
+        platformFormat,
+        undefined,
+        undefined,
+        resourcesContext
       );
 
       const result = await generateContent(prompt);
@@ -104,6 +122,14 @@ export function PostGenerator({ onPostGenerated }: Props) {
       const defaultPostType: PostType = 'Tip of the Day';
       const defaultSkillLevel: SkillLevel = 'All Levels';
       const audience = `high school bowlers (${defaultSkillLevel})`;
+
+      // Fetch resources if available
+      let resourcesContext = '';
+      if (config.resources && config.resources.length > 0) {
+        const fetchedResources = await fetchMultipleResources(config.resources);
+        resourcesContext = formatResourcesForPrompt(fetchedResources);
+      }
+
       const prompt = generateCoachPrompt(
         defaultPostType,
         topicToUse,
@@ -111,7 +137,10 @@ export function PostGenerator({ onPostGenerated }: Props) {
         additionalContext,
         config.profile.name,
         selectedPersona,
-        platformFormat
+        platformFormat,
+        undefined,
+        undefined,
+        resourcesContext
       );
 
       const result = await generateContent(prompt);
@@ -197,6 +226,20 @@ export function PostGenerator({ onPostGenerated }: Props) {
 
   return (
     <div className="post-generator">
+      {resourceCount > 0 && (
+        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#dbeafe', border: '2px solid #3b82f6', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>📚</span>
+            <div>
+              <strong style={{ color: '#1e40af' }}>Resource-Enhanced Generation Active</strong>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#1e3a8a' }}>
+                Using {resourceCount} reference {resourceCount === 1 ? 'resource' : 'resources'} to enhance post accuracy and depth
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="persona-section">
         <h3>Choose Your Coach Persona:</h3>
         <div className="persona-grid">
@@ -303,14 +346,120 @@ export function PostGenerator({ onPostGenerated }: Props) {
       {generatedPost && (
         <div className="generated-result">
           <h3>Generated Post:</h3>
-          <div className="post-preview">{generatedPost}</div>
+
+          {/* Platform Toggle Buttons */}
+          <div className="platform-selector" style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {(['standard', 'facebook', 'instagram', 'twitter'] as PlatformFormat[]).map((platform) => {
+              const info = getPlatformInfo(platform);
+              return (
+                <button
+                  key={platform}
+                  className={`btn btn-outline btn-sm ${viewPlatform === platform ? 'active' : ''}`}
+                  onClick={() => setViewPlatform(platform)}
+                  style={{
+                    backgroundColor: viewPlatform === platform ? info.color : 'transparent',
+                    color: viewPlatform === platform ? '#fff' : 'inherit',
+                    borderColor: info.color,
+                  }}
+                >
+                  {info.emoji} {info.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Platform Metrics Display */}
+          {(() => {
+            const formatted = formatPostForPlatform(generatedPost, viewPlatform);
+            const info = getPlatformInfo(viewPlatform);
+            return (
+              <>
+                <div style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <span>📊 {formatted.metrics.characterCount} characters</span>
+                    <span>📝 {formatted.metrics.wordCount} words</span>
+                    {formatted.metrics.threadCount && (
+                      <span>🧵 {formatted.metrics.threadCount} tweets</span>
+                    )}
+                    {formatted.metrics.isTruncated && (
+                      <span style={{ color: '#f59e0b' }}>✂️ Preview: {formatted.metrics.previewLength} chars</span>
+                    )}
+                  </div>
+                  <div style={{ marginTop: '0.25rem', fontStyle: 'italic' }}>
+                    {info.previewNote}
+                  </div>
+                </div>
+
+                {/* Post Preview with Platform Formatting */}
+                {viewPlatform === 'twitter' && formatted.metrics.threadCount && formatted.metrics.threadCount > 1 ? (
+                  // Twitter thread view
+                  <div className="post-preview" style={{ whiteSpace: 'pre-wrap' }}>
+                    {formatted.content.split('\n\n---\n\n').map((tweet, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          padding: '1rem',
+                          marginBottom: '0.75rem',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px',
+                          backgroundColor: 'var(--bg-secondary)',
+                        }}
+                      >
+                        {tweet}
+                      </div>
+                    ))}
+                  </div>
+                ) : formatted.metrics.isTruncated ? (
+                  // Show preview fold for Facebook/Instagram
+                  <div className="post-preview" style={{ position: 'relative' }}>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: `${Math.ceil(formatted.metrics.previewLength / 80) * 1.5}em`,
+                        height: '2px',
+                        background: 'linear-gradient(to right, transparent, #f59e0b, transparent)',
+                        zIndex: 1,
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <span
+                        style={{
+                          position: 'absolute',
+                          left: '50%',
+                          top: '-0.75em',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: 'var(--bg-color)',
+                          padding: '0 0.5rem',
+                          fontSize: '0.75rem',
+                          color: '#f59e0b',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {viewPlatform === 'facebook' ? 'See More...' : 'more'}
+                      </span>
+                    </div>
+                    {formatted.content}
+                  </div>
+                ) : (
+                  // Standard view
+                  <div className="post-preview">{formatted.content}</div>
+                )}
+              </>
+            );
+          })()}
+
           <div className="post-actions-section">
             <div className="post-actions">
               <button
                 className="btn btn-secondary"
-                onClick={() => navigator.clipboard.writeText(generatedPost)}
+                onClick={() => {
+                  const formatted = formatPostForPlatform(generatedPost, viewPlatform);
+                  navigator.clipboard.writeText(formatted.content);
+                }}
               >
-                📋 Copy
+                📋 Copy {viewPlatform !== 'standard' ? getPlatformInfo(viewPlatform).name : ''} Version
               </button>
             </div>
             <div className="regenerate-section">

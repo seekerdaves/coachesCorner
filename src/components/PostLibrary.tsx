@@ -3,6 +3,7 @@ import type { GeneratedPost, CoachPersonaType, PlatformFormat } from '../types';
 import { loadConfig, markPostAsUsed, deletePost, addPost } from '../services/storage';
 import { generateContent } from '../services/gemini';
 import { generateCoachPrompt, COACH_PERSONAS } from '../services/coachPersonality';
+import { formatPostForPlatform, getPlatformInfo } from '../services/platformFormatter';
 
 export function PostLibrary() {
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
@@ -15,6 +16,7 @@ export function PostLibrary() {
   const [showPlatformSelector, setShowPlatformSelector] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [personaFilter, setPersonaFilter] = useState<string>('all');
+  const [viewPlatformPerPost, setViewPlatformPerPost] = useState<Record<string, PlatformFormat>>({});
 
   useEffect(() => {
     loadPosts();
@@ -38,9 +40,15 @@ export function PostLibrary() {
   };
 
   const handleCopy = async (content: string, id: string) => {
-    await navigator.clipboard.writeText(content);
+    const platform = viewPlatformPerPost[id] || 'standard';
+    const formatted = formatPostForPlatform(content, platform);
+    await navigator.clipboard.writeText(formatted.content);
     setCopySuccess(id);
     setTimeout(() => setCopySuccess(null), 2000);
+  };
+
+  const setPostViewPlatform = (postId: string, platform: PlatformFormat) => {
+    setViewPlatformPerPost(prev => ({ ...prev, [postId]: platform }));
   };
 
   const handleRegenerateWithPersona = async (post: GeneratedPost, newPersona: CoachPersonaType) => {
@@ -264,6 +272,101 @@ export function PostLibrary() {
               >
                 {expandedPost === post.id ? post.content : getPreview(post.content)}
               </div>
+
+              {expandedPost === post.id && (
+                <>
+                  {/* Platform Toggle Buttons */}
+                  <div className="platform-selector" style={{ marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {(['standard', 'facebook', 'instagram', 'twitter'] as PlatformFormat[]).map((platform) => {
+                      const info = getPlatformInfo(platform);
+                      const currentPlatform = viewPlatformPerPost[post.id] || 'standard';
+                      return (
+                        <button
+                          key={platform}
+                          className={`btn btn-outline btn-sm ${currentPlatform === platform ? 'active' : ''}`}
+                          onClick={() => setPostViewPlatform(post.id, platform)}
+                          style={{
+                            backgroundColor: currentPlatform === platform ? info.color : 'transparent',
+                            color: currentPlatform === platform ? '#fff' : 'inherit',
+                            borderColor: info.color,
+                            fontSize: '0.85rem',
+                            padding: '0.35rem 0.75rem',
+                          }}
+                        >
+                          {info.emoji} {info.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Platform Metrics Display */}
+                  {(() => {
+                    const currentPlatform = viewPlatformPerPost[post.id] || 'standard';
+                    const formatted = formatPostForPlatform(post.content, currentPlatform);
+                    const info = getPlatformInfo(currentPlatform);
+
+                    if (currentPlatform !== 'standard') {
+                      return (
+                        <div style={{ marginBottom: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)', padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '6px' }}>
+                          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                            <span>📊 {formatted.metrics.characterCount} characters</span>
+                            <span>📝 {formatted.metrics.wordCount} words</span>
+                            {formatted.metrics.threadCount && (
+                              <span>🧵 {formatted.metrics.threadCount} tweets</span>
+                            )}
+                            {formatted.metrics.isTruncated && (
+                              <span style={{ color: '#f59e0b' }}>✂️ Preview: {formatted.metrics.previewLength} chars</span>
+                            )}
+                          </div>
+                          <div style={{ fontStyle: 'italic', fontSize: '0.8rem' }}>
+                            {info.previewNote}
+                          </div>
+
+                          {/* Show formatted version */}
+                          {currentPlatform === 'twitter' && formatted.metrics.threadCount && formatted.metrics.threadCount > 1 ? (
+                            <div style={{ marginTop: '0.75rem' }}>
+                              <strong>Thread Preview:</strong>
+                              {formatted.content.split('\n\n---\n\n').map((tweet, index) => (
+                                <div
+                                  key={index}
+                                  style={{
+                                    padding: '0.75rem',
+                                    marginTop: '0.5rem',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'var(--bg-color)',
+                                    fontSize: '0.9rem',
+                                  }}
+                                >
+                                  {tweet}
+                                </div>
+                              ))}
+                            </div>
+                          ) : formatted.metrics.isTruncated && (
+                            <div style={{ marginTop: '0.75rem' }}>
+                              <strong>Preview (first {formatted.metrics.previewLength} chars):</strong>
+                              <div style={{
+                                padding: '0.75rem',
+                                marginTop: '0.5rem',
+                                backgroundColor: 'var(--bg-color)',
+                                borderRadius: '6px',
+                                borderLeft: '3px solid #f59e0b',
+                                fontSize: '0.9rem',
+                              }}>
+                                {post.content.substring(0, formatted.metrics.previewLength)}
+                                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+                                  {currentPlatform === 'facebook' ? ' ...See More' : ' ...more'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </>
+              )}
 
               {expandedPost === post.id && (
                 <div className="post-regenerate-section">
