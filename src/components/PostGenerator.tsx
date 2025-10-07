@@ -250,6 +250,20 @@ export function PostGenerator({ onPostGenerated }: Props) {
       ) : (
         <div className="custom-form">
           <div className="form-group">
+            <label htmlFor="platformFormat">Platform Format</label>
+            <select
+              id="platformFormat"
+              value={platformFormat}
+              onChange={(e) => setPlatformFormat(e.target.value as PlatformFormat)}
+            >
+              <option value="standard">📱 Standard</option>
+              <option value="facebook">📘 Facebook</option>
+              <option value="instagram">📸 Instagram</option>
+              <option value="twitter">𝕏 Twitter/X</option>
+            </select>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="customTopic">Topic</label>
             <input
               id="customTopic"

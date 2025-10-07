@@ -618,6 +618,35 @@ body {
   align-items: center;
 }
 
+.advanced-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.advanced-filters .form-group {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.advanced-filters label {
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.advanced-filters select {
+  display: inline-block;
+  width: auto;
+  min-width: 180px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
 .filter-tabs {
   display: flex;
   gap: 0.5rem;
@@ -726,6 +755,42 @@ body {
   line-height: 1.8;
   margin-bottom: 1rem;
   color: var(--text-color);
+  max-height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.post-card.expanded .post-content {
+  max-height: none;
+  overflow: visible;
+}
+
+.post-regenerate-section {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--bg-color);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.post-regenerate-section h5 {
+  margin-bottom: 0.75rem;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.regenerate-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .post-card-footer {

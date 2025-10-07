@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
-import type { GeneratedPost } from '../types';
-import { loadConfig, markPostAsUsed, deletePost } from '../services/storage';
+import type { GeneratedPost, CoachPersonaType, PlatformFormat } from '../types';
+import { loadConfig, markPostAsUsed, deletePost, addPost } from '../services/storage';
+import { generateContent } from '../services/gemini';
+import { generateCoachPrompt, COACH_PERSONAS } from '../services/coachPersonality';
 
 export function PostLibrary() {
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
   const [filter, setFilter] = useState<'all' | 'unused' | 'used'>('unused');
   const [searchTerm, setSearchTerm] = useState('');
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [expandedPost, setExpandedPost] = useState<string | null>(null);
+  const [regeneratingPost, setRegeneratingPost] = useState<string | null>(null);
+  const [showPersonaSelector, setShowPersonaSelector] = useState<string | null>(null);
+  const [showPlatformSelector, setShowPlatformSelector] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [personaFilter, setPersonaFilter] = useState<string>('all');
 
   useEffect(() => {
     loadPosts();
@@ -35,6 +43,91 @@ export function PostLibrary() {
     setTimeout(() => setCopySuccess(null), 2000);
   };
 
+  const handleRegenerateWithPersona = async (post: GeneratedPost, newPersona: CoachPersonaType) => {
+    setRegeneratingPost(post.id);
+    setShowPersonaSelector(null);
+
+    try {
+      const config = loadConfig();
+      const audience = `high school bowlers (${post.skillLevel})`;
+      const prompt = generateCoachPrompt(
+        post.postType,
+        post.topic,
+        audience,
+        '',
+        config.profile.name,
+        newPersona,
+        undefined,
+        'change-personality',
+        post.content
+      );
+
+      const result = await generateContent(prompt);
+
+      const newPost = addPost({
+        content: result,
+        postType: post.postType,
+        skillLevel: post.skillLevel,
+        topic: post.topic,
+        category: post.category,
+        tags: [...post.tags.filter(t => !COACH_PERSONAS.find(p => p.type === t)), newPersona, 'regenerated'],
+      });
+
+      loadPosts();
+      setExpandedPost(newPost.id);
+    } catch (err) {
+      alert(`Error regenerating: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setRegeneratingPost(null);
+    }
+  };
+
+  const handleRegenerateWithPlatform = async (post: GeneratedPost, platform: PlatformFormat) => {
+    setRegeneratingPost(post.id);
+    setShowPlatformSelector(null);
+
+    try {
+      const config = loadConfig();
+      const audience = `high school bowlers (${post.skillLevel})`;
+      const personaTag = post.tags.find(t => COACH_PERSONAS.find(p => p.type === t)) as CoachPersonaType | undefined;
+
+      const prompt = generateCoachPrompt(
+        post.postType,
+        post.topic,
+        audience,
+        '',
+        config.profile.name,
+        personaTag || 'Next Gen Hotshot',
+        platform,
+        undefined,
+        post.content
+      );
+
+      const result = await generateContent(prompt);
+
+      const newPost = addPost({
+        content: result,
+        postType: post.postType,
+        skillLevel: post.skillLevel,
+        topic: post.topic,
+        category: post.category,
+        tags: [...post.tags, platform, 'regenerated'],
+      });
+
+      loadPosts();
+      setExpandedPost(newPost.id);
+    } catch (err) {
+      alert(`Error regenerating: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setRegeneratingPost(null);
+    }
+  };
+
+  const getPreview = (content: string, maxLength: number = 150) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
   const filteredPosts = posts
     .filter((post) => {
       if (filter === 'unused') return !post.isUsed;
@@ -42,6 +135,8 @@ export function PostLibrary() {
       return true;
     })
     .filter((post) => {
+      if (categoryFilter !== 'all' && post.category !== categoryFilter) return false;
+      if (personaFilter !== 'all' && !post.tags.includes(personaFilter)) return false;
       if (!searchTerm) return true;
       const search = searchTerm.toLowerCase();
       return (
@@ -54,6 +149,8 @@ export function PostLibrary() {
 
   const unusedCount = posts.filter((p) => !p.isUsed).length;
   const usedCount = posts.filter((p) => p.isUsed).length;
+  const categories = ['all', ...Array.from(new Set(posts.map(p => p.category)))];
+  const personas = ['all', ...COACH_PERSONAS.map(p => p.type)];
 
   return (
     <div className="post-library">
@@ -103,6 +200,38 @@ export function PostLibrary() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
+        <div className="advanced-filters">
+          <div className="form-group">
+            <label htmlFor="categoryFilter">Category:</label>
+            <select
+              id="categoryFilter"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat === 'all' ? 'All Categories' : cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="personaFilter">Persona:</label>
+            <select
+              id="personaFilter"
+              value={personaFilter}
+              onChange={(e) => setPersonaFilter(e.target.value)}
+            >
+              {personas.map(persona => (
+                <option key={persona} value={persona}>
+                  {persona === 'all' ? 'All Personas' : persona}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="posts-grid">
@@ -110,8 +239,8 @@ export function PostLibrary() {
           <div className="empty-state">
             <p className="empty-emoji">📭</p>
             <p className="empty-text">
-              {searchTerm
-                ? 'No posts match your search'
+              {searchTerm || categoryFilter !== 'all' || personaFilter !== 'all'
+                ? 'No posts match your filters'
                 : filter === 'unused'
                 ? 'No unused posts yet. Generate some posts to get started!'
                 : 'No posts yet'}
@@ -119,7 +248,7 @@ export function PostLibrary() {
           </div>
         ) : (
           filteredPosts.map((post) => (
-            <div key={post.id} className={`post-card ${post.isUsed ? 'used' : ''}`}>
+            <div key={post.id} className={`post-card ${post.isUsed ? 'used' : ''} ${expandedPost === post.id ? 'expanded' : ''}`}>
               <div className="post-card-header">
                 <div className="post-meta">
                   <span className="post-type">{post.postType}</span>
@@ -128,7 +257,83 @@ export function PostLibrary() {
                 {post.isUsed && <span className="used-badge">✅ Posted</span>}
               </div>
 
-              <div className="post-content">{post.content}</div>
+              <div
+                className="post-content"
+                onClick={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                {expandedPost === post.id ? post.content : getPreview(post.content)}
+              </div>
+
+              {expandedPost === post.id && (
+                <div className="post-regenerate-section">
+                  <h5>Regenerate with:</h5>
+                  <div className="regenerate-buttons">
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => setShowPersonaSelector(showPersonaSelector === post.id ? null : post.id)}
+                      disabled={regeneratingPost === post.id}
+                    >
+                      🎭 Different Persona
+                    </button>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => setShowPlatformSelector(showPlatformSelector === post.id ? null : post.id)}
+                      disabled={regeneratingPost === post.id}
+                    >
+                      📱 Different Platform
+                    </button>
+                  </div>
+
+                  {showPersonaSelector === post.id && (
+                    <div className="selector-grid">
+                      {COACH_PERSONAS.map((persona) => (
+                        <button
+                          key={persona.type}
+                          className="btn btn-outline btn-sm"
+                          onClick={() => handleRegenerateWithPersona(post, persona.type)}
+                          disabled={regeneratingPost === post.id}
+                        >
+                          {persona.emoji} {persona.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {showPlatformSelector === post.id && (
+                    <div className="selector-grid">
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleRegenerateWithPlatform(post, 'facebook')}
+                        disabled={regeneratingPost === post.id}
+                      >
+                        📘 Facebook
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleRegenerateWithPlatform(post, 'instagram')}
+                        disabled={regeneratingPost === post.id}
+                      >
+                        📸 Instagram
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleRegenerateWithPlatform(post, 'twitter')}
+                        disabled={regeneratingPost === post.id}
+                      >
+                        𝕏 Twitter/X
+                      </button>
+                    </div>
+                  )}
+
+                  {regeneratingPost === post.id && (
+                    <div className="loading-indicator" style={{ padding: '1rem' }}>
+                      <div className="spinner"></div>
+                      <p>Regenerating post...</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="post-card-footer">
                 <div className="post-tags">
