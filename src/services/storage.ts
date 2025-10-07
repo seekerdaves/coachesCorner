@@ -1,4 +1,4 @@
-import type { AppConfig, GeneratedPost, Resource, CoachProfile, PersonaPreferences, CoachPersonaType } from '../types';
+import type { AppConfig, GeneratedPost, Resource, CoachProfile, PersonaPreferences } from '../types';
 import { COACH_PERSONAS } from './coachPersonality';
 
 const STORAGE_KEY = 'bowling-coach-app-data';

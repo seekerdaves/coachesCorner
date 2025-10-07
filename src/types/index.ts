@@ -25,7 +25,7 @@ export type CoachPersonaType =
 
 export type PlatformFormat = 'standard' | 'facebook' | 'instagram' | 'twitter';
 
-export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality';
+export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality' | 'facebook' | 'instagram' | 'twitter';
 
 export interface Resource {
   id: string;

@@ -122,6 +122,7 @@ export function AdminConfig() {
         // If we're disabling the default persona, set a new default
         if (prev.defaultPersona === personaType) {
           return {
+            ...prev,
             defaultPersona: newEnabled[0],
             enabledPersonas: newEnabled,
           };

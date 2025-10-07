@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { generateContent } from '../services/gemini';
-import { generateCoachPrompt, BOWLING_TOPICS, COACH_PERSONAS } from '../services/coachPersonality';
+import { generateCoachPrompt, COACH_PERSONAS } from '../services/coachPersonality';
 import type { PostType, SkillLevel, GeneratedPost, CoachPersonaType, RegenerateStyle, PlatformFormat } from '../types';
 import { addPost, loadConfig, getPersonaPreferences } from '../services/storage';
 
@@ -17,10 +17,6 @@ const QUICK_TEMPLATES = [
 
 export function PostGenerator({ onPostGenerated }: Props) {
   const [mode, setMode] = useState<'quick' | 'custom'>('quick');
-  const [postType, setPostType] = useState<PostType>('Tip of the Day');
-  const [skillLevel, setSkillLevel] = useState<SkillLevel>('All Levels');
-  const [category, setCategory] = useState('Fundamentals');
-  const [topic, setTopic] = useState('Proper Stance');
   const [customTopic, setCustomTopic] = useState('');
   const [additionalContext, setAdditionalContext] = useState('');
   const [selectedPersona, setSelectedPersona] = useState<CoachPersonaType>('Next Gen Hotshot');
@@ -44,22 +40,6 @@ export function PostGenerator({ onPostGenerated }: Props) {
     setEnabledPersonas(prefs.enabledPersonas);
     setPlatformFormat(prefs.defaultPlatformFormat);
   }, []);
-
-  const postTypes: PostType[] = [
-    'Tip of the Day',
-    'Motivational',
-    'Technique Deep Dive',
-    'Team Achievement',
-    'Practice Drill',
-    'Mental Game',
-    'Equipment Advice',
-    'Event Announcement',
-    'Season Reflection',
-  ];
-
-  const skillLevels: SkillLevel[] = ['Beginner', 'Intermediate', 'Advanced', 'All Levels'];
-  const selectedCategory = BOWLING_TOPICS.find((cat) => cat.name === category);
-  const topics = selectedCategory?.topics || [];
 
   const handleQuickGenerate = async (template: typeof QUICK_TEMPLATES[0]) => {
     setIsLoading(true);
@@ -189,6 +169,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
         lastGenerateParams.additionalContext,
         config.profile.name,
         personaToUse,
+        undefined,
         style,
         generatedPost
       );
@@ -202,7 +183,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
         postType: lastGenerateParams.postType,
         skillLevel: lastGenerateParams.skillLevel,
         topic: lastGenerateParams.topic,
-        category: mode === 'quick' ? 'Quick Generate' : category,
+        category: 'Regenerated',
         tags: [lastGenerateParams.postType, lastGenerateParams.topic, personaToUse, style],
       });
 
@@ -211,14 +192,6 @@ export function PostGenerator({ onPostGenerated }: Props) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleCategoryChange = (newCategory: string) => {
-    setCategory(newCategory);
-    const newCategoryTopics = BOWLING_TOPICS.find((cat) => cat.name === newCategory);
-    if (newCategoryTopics && newCategoryTopics.topics.length > 0) {
-      setTopic(newCategoryTopics.topics[0]);
     }
   };
 
