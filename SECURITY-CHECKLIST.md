@@ -31,12 +31,12 @@ Go to: https://app.netlify.com/sites/coachpost/settings/env
 Add these variables (NO quotes needed):
 
 ```
-VITE_FIREBASE_API_KEY=AIzaSyDQMviwtsNgRxC5k1S0AdaHuKqsuMXlxVA
+VITE_FIREBASE_API_KEY=[Your Firebase API Key]
 VITE_FIREBASE_AUTH_DOMAIN=bowling-coach-app.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=bowling-coach-app
 VITE_FIREBASE_STORAGE_BUCKET=bowling-coach-app.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=653246630371
-VITE_FIREBASE_APP_ID=1:653246630371:web:e776d86e3617fc1a10f8d6
+VITE_FIREBASE_MESSAGING_SENDER_ID=[Your Sender ID]
+VITE_FIREBASE_APP_ID=[Your Firebase App ID]
 ```
 
 **DO NOT ADD:**
@@ -131,7 +131,7 @@ After following all steps:
 ## 🔐 What's Safe vs What's Not
 
 ### ✅ SAFE to be public:
-- Firebase API key (AIzaSyDQMviwtsNgRxC5k1S0AdaHuKqsuMXlxVA)
+- Firebase API key (web API keys are public by design)
 - Firebase project ID, auth domain, etc.
 - Your app source code
 - These are meant to be public!

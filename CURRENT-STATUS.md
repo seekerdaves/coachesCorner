@@ -45,12 +45,12 @@ Add these (click "Add a variable" for each):
 
 | Key | Value |
 |-----|-------|
-| `VITE_FIREBASE_API_KEY` | `AIzaSyDQMviwtsNgRxC5k1S0AdaHuKqsuMXlxVA` |
+| `VITE_FIREBASE_API_KEY` | `[Your Firebase API Key]` |
 | `VITE_FIREBASE_AUTH_DOMAIN` | `bowling-coach-app.firebaseapp.com` |
 | `VITE_FIREBASE_PROJECT_ID` | `bowling-coach-app` |
 | `VITE_FIREBASE_STORAGE_BUCKET` | `bowling-coach-app.firebasestorage.app` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `653246630371` |
-| `VITE_FIREBASE_APP_ID` | `1:653246630371:web:e776d86e3617fc1a10f8d6` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `[Your Sender ID]` |
+| `VITE_FIREBASE_APP_ID` | `[Your Firebase App ID]` |
 
 **Important:** Do NOT add `VITE_GEMINI_API_KEY` to Netlify!
 

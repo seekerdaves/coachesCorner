@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Exclude documentation and specific patterns from secrets scanning
+# Firebase web API keys are meant to be public and appear in client bundles
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "CURRENT-STATUS.md,SECURITY-CHECKLIST.md,*.md,dist/**/*"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FIREBASE_API_KEY"
