@@ -81,8 +81,26 @@ export const generateContent = async (prompt: string): Promise<string> => {
                 temperature: 0.9,
                 topK: 40,
                 topP: 0.95,
-                maxOutputTokens: 1024,
-              }
+                maxOutputTokens: 2048,
+              },
+              safetySettings: [
+                {
+                  category: 'HARM_CATEGORY_HARASSMENT',
+                  threshold: 'BLOCK_NONE'
+                },
+                {
+                  category: 'HARM_CATEGORY_HATE_SPEECH',
+                  threshold: 'BLOCK_NONE'
+                },
+                {
+                  category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                  threshold: 'BLOCK_NONE'
+                },
+                {
+                  category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                  threshold: 'BLOCK_NONE'
+                }
+              ]
             })
           });
 
@@ -94,9 +112,23 @@ export const generateContent = async (prompt: string): Promise<string> => {
 
           const data = await response.json();
 
+          // Log the full response for debugging
+          console.log(`📊 Full API response from ${version}/${model}:`, data);
+
           if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            const generatedText = data.candidates[0].content.parts[0].text;
             console.log(`✅ Success with ${version}/${model}`);
-            return data.candidates[0].content.parts[0].text;
+            console.log(`📝 Generated text length: ${generatedText.length} characters`);
+
+            // Check if response was blocked or truncated
+            if (data.candidates[0].finishReason) {
+              console.log(`🏁 Finish reason: ${data.candidates[0].finishReason}`);
+            }
+            if (data.candidates[0].safetyRatings) {
+              console.log(`🛡️ Safety ratings:`, data.candidates[0].safetyRatings);
+            }
+
+            return generatedText;
           }
 
           console.warn(`${version}/${model} returned unexpected format:`, data);

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateContent } from '../services/gemini';
 import { generateCoachPrompt, BOWLING_TOPICS, COACH_PERSONAS } from '../services/coachPersonality';
-import type { PostType, SkillLevel, GeneratedPost, CoachPersonaType, RegenerateStyle } from '../types';
-import { addPost, loadConfig } from '../services/storage';
+import type { PostType, SkillLevel, GeneratedPost, CoachPersonaType, RegenerateStyle, PlatformFormat } from '../types';
+import { addPost, loadConfig, getPersonaPreferences } from '../services/storage';
 
 interface Props {
   onPostGenerated?: (post: GeneratedPost) => void;
@@ -23,16 +23,27 @@ export function PostGenerator({ onPostGenerated }: Props) {
   const [topic, setTopic] = useState('Proper Stance');
   const [customTopic, setCustomTopic] = useState('');
   const [additionalContext, setAdditionalContext] = useState('');
-  const [selectedPersona, setSelectedPersona] = useState<CoachPersonaType>('Gen Z');
+  const [selectedPersona, setSelectedPersona] = useState<CoachPersonaType>('Next Gen Hotshot');
+  const [enabledPersonas, setEnabledPersonas] = useState<CoachPersonaType[]>(COACH_PERSONAS.map(p => p.type));
+  const [platformFormat, setPlatformFormat] = useState<PlatformFormat>('standard');
   const [generatedPost, setGeneratedPost] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPersonaSelector, setShowPersonaSelector] = useState(false);
   const [lastGenerateParams, setLastGenerateParams] = useState<{
     postType: PostType;
     topic: string;
     skillLevel: SkillLevel;
     additionalContext: string;
   } | null>(null);
+
+  // Load persona preferences on mount
+  useEffect(() => {
+    const prefs = getPersonaPreferences();
+    setSelectedPersona(prefs.defaultPersona);
+    setEnabledPersonas(prefs.enabledPersonas);
+    setPlatformFormat(prefs.defaultPlatformFormat);
+  }, []);
 
   const postTypes: PostType[] = [
     'Tip of the Day',
@@ -64,7 +75,8 @@ export function PostGenerator({ onPostGenerated }: Props) {
         audience,
         '',
         config.profile.name,
-        selectedPersona
+        selectedPersona,
+        platformFormat
       );
 
       const result = await generateContent(prompt);
@@ -97,21 +109,29 @@ export function PostGenerator({ onPostGenerated }: Props) {
   };
 
   const handleCustomGenerate = async () => {
+    if (!customTopic.trim()) {
+      setError('Please enter a topic');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setGeneratedPost('');
 
     try {
       const config = loadConfig();
-      const topicToUse = customTopic.trim() || topic;
-      const audience = `high school bowlers (${skillLevel})`;
+      const topicToUse = customTopic.trim();
+      const defaultPostType: PostType = 'Tip of the Day';
+      const defaultSkillLevel: SkillLevel = 'All Levels';
+      const audience = `high school bowlers (${defaultSkillLevel})`;
       const prompt = generateCoachPrompt(
-        postType,
+        defaultPostType,
         topicToUse,
         audience,
         additionalContext,
         config.profile.name,
-        selectedPersona
+        selectedPersona,
+        platformFormat
       );
 
       const result = await generateContent(prompt);
@@ -119,20 +139,20 @@ export function PostGenerator({ onPostGenerated }: Props) {
 
       // Save last generate params for regeneration
       setLastGenerateParams({
-        postType,
+        postType: defaultPostType,
         topic: topicToUse,
-        skillLevel,
+        skillLevel: defaultSkillLevel,
         additionalContext,
       });
 
       // Save to library
       const post = addPost({
         content: result,
-        postType,
-        skillLevel,
+        postType: defaultPostType,
+        skillLevel: defaultSkillLevel,
         topic: topicToUse,
-        category,
-        tags: [postType, category, skillLevel, selectedPersona],
+        category: 'Custom',
+        tags: [defaultPostType, 'Custom', defaultSkillLevel, selectedPersona],
       });
 
       onPostGenerated?.(post);
@@ -207,7 +227,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
       <div className="persona-section">
         <h3>Choose Your Coach Persona:</h3>
         <div className="persona-grid">
-          {COACH_PERSONAS.map((persona) => (
+          {COACH_PERSONAS.filter(persona => enabledPersonas.includes(persona.type)).map((persona) => (
             <button
               key={persona.type}
               className={`persona-card ${selectedPersona === persona.type ? 'active' : ''}`}
@@ -256,70 +276,14 @@ export function PostGenerator({ onPostGenerated }: Props) {
         </div>
       ) : (
         <div className="custom-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="postType">Post Type</label>
-              <select
-                id="postType"
-                value={postType}
-                onChange={(e) => setPostType(e.target.value as PostType)}
-              >
-                {postTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="skillLevel">Skill Level</label>
-              <select
-                id="skillLevel"
-                value={skillLevel}
-                onChange={(e) => setSkillLevel(e.target.value as SkillLevel)}
-              >
-                {skillLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="category">Category</label>
-              <select id="category" value={category} onChange={(e) => handleCategoryChange(e.target.value)}>
-                {BOWLING_TOPICS.map((cat) => (
-                  <option key={cat.name} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="topic">Topic</label>
-              <select id="topic" value={topic} onChange={(e) => setTopic(e.target.value)}>
-                {topics.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div className="form-group">
-            <label htmlFor="customTopic">Custom Topic (optional)</label>
+            <label htmlFor="customTopic">Topic</label>
             <input
               id="customTopic"
               type="text"
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
-              placeholder="Enter a custom topic..."
+              placeholder="Enter your topic (e.g., 'How to improve spare shooting' or 'Ball maintenance tips')..."
             />
           </div>
 
@@ -330,7 +294,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
               value={additionalContext}
               onChange={(e) => setAdditionalContext(e.target.value)}
               placeholder="Any specific details, recent events, or special instructions..."
-              rows={3}
+              rows={4}
             />
           </div>
 
@@ -363,7 +327,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
               </button>
             </div>
             <div className="regenerate-section">
-              <h4>Regenerate Options:</h4>
+              <h4>Adjust Style:</h4>
               <div className="regenerate-options">
                 <button
                   className="btn btn-outline btn-sm"
@@ -388,12 +352,35 @@ export function PostGenerator({ onPostGenerated }: Props) {
                 </button>
                 <button
                   className="btn btn-outline btn-sm"
-                  onClick={() => handleRegenerate('change-personality')}
+                  onClick={() => setShowPersonaSelector(!showPersonaSelector)}
                   disabled={isLoading}
                 >
-                  🎭 Change Personality
+                  🎭 {showPersonaSelector ? 'Cancel' : 'Change Persona'}
                 </button>
               </div>
+
+              {showPersonaSelector && (
+                <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px' }}>
+                  <h4 style={{ marginBottom: '0.75rem' }}>Select New Persona:</h4>
+                  <div className="persona-selector-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                    {COACH_PERSONAS.filter(persona => enabledPersonas.includes(persona.type) && persona.type !== selectedPersona).map((persona) => (
+                      <button
+                        key={persona.type}
+                        className="btn btn-outline btn-sm"
+                        onClick={() => {
+                          setSelectedPersona(persona.type);
+                          setShowPersonaSelector(false);
+                          handleRegenerate('change-personality');
+                        }}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', padding: '0.75rem' }}
+                      >
+                        <span style={{ fontSize: '1.5rem' }}>{persona.emoji}</span>
+                        <span style={{ fontSize: '0.85rem' }}>{persona.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

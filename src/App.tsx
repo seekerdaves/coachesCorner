@@ -6,6 +6,7 @@ import { PostLibrary } from './components/PostLibrary';
 import { AdminConfig } from './components/AdminConfig';
 import { AuthGate } from './components/AuthGate';
 import { UserMenu } from './components/UserMenu';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 type Tab = 'generate' | 'library' | 'admin';
 
@@ -18,7 +19,8 @@ function App() {
   };
 
   return (
-    <AuthGate>
+    <ThemeProvider>
+      <AuthGate>
       <div className="app">
         <header className="header">
           <div className="header-content">
@@ -90,6 +92,7 @@ function App() {
         </footer>
       </div>
     </AuthGate>
+    </ThemeProvider>
   );
 }
 

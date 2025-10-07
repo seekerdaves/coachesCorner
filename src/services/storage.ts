@@ -1,6 +1,13 @@
-import type { AppConfig, GeneratedPost, Resource, CoachProfile } from '../types';
+import type { AppConfig, GeneratedPost, Resource, CoachProfile, PersonaPreferences, CoachPersonaType } from '../types';
+import { COACH_PERSONAS } from './coachPersonality';
 
 const STORAGE_KEY = 'bowling-coach-app-data';
+
+const DEFAULT_PERSONA_PREFERENCES: PersonaPreferences = {
+  defaultPersona: 'Next Gen Hotshot',
+  enabledPersonas: COACH_PERSONAS.map(p => p.type),
+  defaultPlatformFormat: 'standard',
+};
 
 const DEFAULT_CONFIG: AppConfig = {
   profile: {
@@ -8,6 +15,7 @@ const DEFAULT_CONFIG: AppConfig = {
     schoolName: 'High School',
     teamName: 'Bowling Team',
   },
+  personaPreferences: DEFAULT_PERSONA_PREFERENCES,
   resources: [
     {
       id: '1',
@@ -82,6 +90,7 @@ export const loadConfig = (): AppConfig => {
         resources: parsed.resources || DEFAULT_CONFIG.resources,
         posts: parsed.posts || [],
         postHistory: parsed.postHistory || [],
+        personaPreferences: parsed.personaPreferences || DEFAULT_PERSONA_PREFERENCES,
       };
     }
   } catch (error) {
@@ -172,4 +181,15 @@ export const getUnusedPosts = (): GeneratedPost[] => {
 export const getUsedPosts = (): GeneratedPost[] => {
   const config = loadConfig();
   return config.posts.filter((p) => p.isUsed);
+};
+
+export const updatePersonaPreferences = (preferences: PersonaPreferences): void => {
+  const config = loadConfig();
+  config.personaPreferences = preferences;
+  saveConfig(config);
+};
+
+export const getPersonaPreferences = (): PersonaPreferences => {
+  const config = loadConfig();
+  return config.personaPreferences || DEFAULT_PERSONA_PREFERENCES;
 };

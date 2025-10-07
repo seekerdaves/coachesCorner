@@ -11,6 +11,20 @@
   --error-color: #ef4444;
 }
 
+/* Dark theme */
+[data-theme='dark'] {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --secondary-color: #f59e0b;
+  --bg-color: #1f2937;
+  --card-bg: #374151;
+  --text-color: #f9fafb;
+  --text-light: #d1d5db;
+  --border-color: #4b5563;
+  --success-color: #10b981;
+  --error-color: #ef4444;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -1105,6 +1119,75 @@ body {
 
 .menu-item:hover {
   background: var(--bg-color);
+}
+
+/* Platform Formatting Section */
+.platform-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.platform-section h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.platform-btn {
+  padding: 1rem;
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.platform-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.platform-btn.active {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.platform-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Persona Settings */
+.personas-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.persona-settings-card {
+  transition: opacity 0.2s;
+}
+
+.persona-settings-card.disabled-persona {
+  opacity: 0.5;
+}
+
+.persona-summary {
+  padding: 1rem;
+  border: 2px solid var(--border-color);
 }
 
 @media (max-width: 768px) {

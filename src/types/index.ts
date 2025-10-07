@@ -14,12 +14,16 @@ export type PostType =
 export type SkillLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
 
 export type CoachPersonaType =
-  | 'Gen Z'
-  | 'Gen Alpha'
-  | 'Bowling Guru'
-  | 'Professional'
+  | 'Old School League Bowler'
+  | 'Competitive Grinder'
+  | 'Next Gen Hotshot'
+  | 'Team Parent Coach'
+  | 'Recreational Social'
+  | 'Tech Data Enthusiast'
   | 'USBC Gold Coach'
   | 'Ball Driller Expert';
+
+export type PlatformFormat = 'standard' | 'facebook' | 'instagram' | 'twitter';
 
 export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality';
 
@@ -53,9 +57,16 @@ export interface CoachProfile {
   socialHandle?: string;
 }
 
+export interface PersonaPreferences {
+  defaultPersona: CoachPersonaType;
+  enabledPersonas: CoachPersonaType[];
+  defaultPlatformFormat: PlatformFormat;
+}
+
 export interface AppConfig {
   profile: CoachProfile;
   resources: Resource[];
   posts: GeneratedPost[];
   postHistory: string[]; // IDs of used posts
+  personaPreferences?: PersonaPreferences;
 }

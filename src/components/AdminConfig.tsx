@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import type { CoachProfile, Resource } from '../types';
-import { loadConfig, updateProfile, addResource, updateResource, deleteResource } from '../services/storage';
+import type { CoachProfile, Resource, PersonaPreferences, CoachPersonaType } from '../types';
+import { loadConfig, updateProfile, addResource, updateResource, deleteResource, updatePersonaPreferences, getPersonaPreferences } from '../services/storage';
 import { getUserApiKey, saveUserApiKey, clearUserApiKey } from '../services/userApiKey';
+import { COACH_PERSONAS } from '../services/coachPersonality';
 
 export function AdminConfig() {
-  const [activeTab, setActiveTab] = useState<'apikey' | 'profile' | 'resources'>('apikey');
+  const [activeTab, setActiveTab] = useState<'apikey' | 'profile' | 'personas' | 'resources'>('apikey');
   const [profile, setProfile] = useState<CoachProfile>({
     name: 'Coach',
     schoolName: 'High School',
@@ -26,10 +27,19 @@ export function AdminConfig() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaveSuccess, setApiKeySaveSuccess] = useState(false);
 
+  // Persona preferences state
+  const [personaPreferences, setPersonaPreferences] = useState<PersonaPreferences>({
+    defaultPersona: 'Next Gen Hotshot',
+    enabledPersonas: COACH_PERSONAS.map(p => p.type),
+    defaultPlatformFormat: 'standard',
+  });
+  const [personaSaveSuccess, setPersonaSaveSuccess] = useState(false);
+
   useEffect(() => {
     const config = loadConfig();
     setProfile(config.profile);
     setResources(config.resources);
+    setPersonaPreferences(getPersonaPreferences());
 
     // Load API key
     const savedApiKey = getUserApiKey();
@@ -97,6 +107,49 @@ export function AdminConfig() {
     return key.slice(0, 4) + '••••••••••••' + key.slice(-4);
   };
 
+  const handleTogglePersona = (personaType: CoachPersonaType) => {
+    setPersonaPreferences(prev => {
+      const isEnabled = prev.enabledPersonas.includes(personaType);
+      let newEnabled: CoachPersonaType[];
+
+      if (isEnabled) {
+        // Don't allow disabling if it's the only one left
+        if (prev.enabledPersonas.length === 1) {
+          alert('You must have at least one persona enabled');
+          return prev;
+        }
+        newEnabled = prev.enabledPersonas.filter(p => p !== personaType);
+        // If we're disabling the default persona, set a new default
+        if (prev.defaultPersona === personaType) {
+          return {
+            defaultPersona: newEnabled[0],
+            enabledPersonas: newEnabled,
+          };
+        }
+      } else {
+        newEnabled = [...prev.enabledPersonas, personaType];
+      }
+
+      return {
+        ...prev,
+        enabledPersonas: newEnabled,
+      };
+    });
+  };
+
+  const handleSetDefaultPersona = (personaType: CoachPersonaType) => {
+    setPersonaPreferences(prev => ({
+      ...prev,
+      defaultPersona: personaType,
+    }));
+  };
+
+  const handleSavePersonaPreferences = () => {
+    updatePersonaPreferences(personaPreferences);
+    setPersonaSaveSuccess(true);
+    setTimeout(() => setPersonaSaveSuccess(false), 2000);
+  };
+
   return (
     <div className="admin-config">
       <div className="admin-tabs">
@@ -111,6 +164,12 @@ export function AdminConfig() {
           onClick={() => setActiveTab('profile')}
         >
           👤 Profile
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'personas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('personas')}
+        >
+          🎭 Personas
         </button>
         <button
           className={`tab-btn ${activeTab === 'resources' ? 'active' : ''}`}
@@ -273,6 +332,130 @@ export function AdminConfig() {
           <button className="btn btn-primary" onClick={handleProfileSave}>
             {saveSuccess ? '✅ Saved!' : '💾 Save Profile'}
           </button>
+        </div>
+      )}
+
+      {activeTab === 'personas' && (
+        <div className="personas-section">
+          <h3>Coach Persona Settings</h3>
+          <p className="section-description">
+            Choose which personas appear on the Generate page and set your default persona.
+          </p>
+
+          <div className="persona-settings-info card" style={{ backgroundColor: '#dbeafe', borderColor: '#3b82f6', marginBottom: '1.5rem', border: '2px solid', padding: '1rem' }}>
+            <h4 style={{ color: '#1e40af', marginBottom: '0.5rem' }}>💡 How This Works</h4>
+            <p style={{ color: '#1e3a8a', marginBottom: '0.5rem' }}>
+              • Toggle personas ON/OFF to show/hide them on the Generate page
+            </p>
+            <p style={{ color: '#1e3a8a', marginBottom: '0.5rem' }}>
+              • Set a default persona that will be pre-selected when you open the app
+            </p>
+            <p style={{ color: '#1e3a8a', marginBottom: 0 }}>
+              • This helps declutter your workspace - only show the personas you actually use
+            </p>
+          </div>
+
+          <div className="personas-list">
+            {COACH_PERSONAS.map((persona) => {
+              const isEnabled = personaPreferences.enabledPersonas.includes(persona.type);
+              const isDefault = personaPreferences.defaultPersona === persona.type;
+
+              return (
+                <div key={persona.type} className={`persona-settings-card card ${!isEnabled ? 'disabled-persona' : ''}`}>
+                  <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
+                    <div style={{ fontSize: '2.5rem' }}>{persona.emoji}</div>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ marginBottom: '0.25rem' }}>{persona.name}</h4>
+                      <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                        {persona.description}
+                      </p>
+                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={isEnabled}
+                            onChange={() => handleTogglePersona(persona.type)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.9rem' }}>Show on Generate page</span>
+                        </label>
+                        {isEnabled && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                            <input
+                              type="radio"
+                              name="defaultPersona"
+                              checked={isDefault}
+                              onChange={() => handleSetDefaultPersona(persona.type)}
+                              style={{ cursor: 'pointer' }}
+                            />
+                            <span style={{ fontSize: '0.9rem', fontWeight: isDefault ? 600 : 400 }}>
+                              Set as default
+                            </span>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <button className="btn btn-primary" onClick={handleSavePersonaPreferences}>
+              {personaSaveSuccess ? '✅ Saved!' : '💾 Save Persona Settings'}
+            </button>
+          </div>
+
+          <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--bg-color)', borderRadius: '12px' }}>
+            <h4 style={{ marginBottom: '1rem' }}>Default Platform Format:</h4>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Choose which platform format to use by default when generating posts
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
+              {[
+                { value: 'standard', emoji: '📝', label: 'Standard', desc: 'No constraints' },
+                { value: 'facebook', emoji: '📘', label: 'Facebook', desc: 'Front-loaded hook' },
+                { value: 'instagram', emoji: '📸', label: 'Instagram', desc: 'Visual format' },
+                { value: 'twitter', emoji: '𝕏', label: 'X/Twitter', desc: 'Thread format' }
+              ].map(format => (
+                <button
+                  key={format.value}
+                  onClick={() => setPersonaPreferences(prev => ({ ...prev, defaultPlatformFormat: format.value as any }))}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: personaPreferences.defaultPlatformFormat === format.value ? 'var(--primary-color)' : 'var(--card-bg)',
+                    color: personaPreferences.defaultPlatformFormat === format.value ? 'white' : 'var(--text-color)',
+                    border: `2px solid ${personaPreferences.defaultPlatformFormat === format.value ? 'var(--primary-color)' : 'var(--border-color)'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span style={{ fontSize: '1.5rem' }}>{format.emoji}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{format.label}</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>{format.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="persona-summary card" style={{ marginTop: '1.5rem', backgroundColor: 'var(--bg-color)' }}>
+            <h4>Current Settings:</h4>
+            <p style={{ marginBottom: '0.5rem' }}>
+              <strong>Default Persona:</strong> {COACH_PERSONAS.find(p => p.type === personaPreferences.defaultPersona)?.name}
+            </p>
+            <p style={{ marginBottom: '0.5rem' }}>
+              <strong>Enabled Personas:</strong> {personaPreferences.enabledPersonas.length} of {COACH_PERSONAS.length}
+            </p>
+            <p style={{ marginBottom: 0 }}>
+              <strong>Default Platform:</strong> {personaPreferences.defaultPlatformFormat.charAt(0).toUpperCase() + personaPreferences.defaultPlatformFormat.slice(1)}
+            </p>
+          </div>
         </div>
       )}
 
