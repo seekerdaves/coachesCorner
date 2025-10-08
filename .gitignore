@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Capacitor
+android/
+ios/
+*.apk
+*.aab
+*.ipa
+
 # Environment variables
 .env
 .env.local

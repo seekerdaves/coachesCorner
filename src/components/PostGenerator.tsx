@@ -303,6 +303,7 @@ export function PostGenerator({ onPostGenerated }: Props) {
               <option value="facebook">📘 Facebook</option>
               <option value="instagram">📸 Instagram</option>
               <option value="twitter">𝕏 Twitter/X</option>
+              <option value="reddit">🗣️ Reddit</option>
             </select>
           </div>
 

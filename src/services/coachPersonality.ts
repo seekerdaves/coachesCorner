@@ -132,6 +132,44 @@ export const COACH_PERSONAS: PersonaConfig[] = [
     style: 'Explains coverstock chemistry, core dynamics, RG/Diff/weights, ball motion characteristics',
     specialization: ['Coverstock technology (pearl, solid, hybrid)', 'Core dynamics (symmetric, asymmetric)', 'RG and Differential ratings', 'Ball surface prep', 'Arsenal building', 'Lane condition matching'],
   },
+  {
+    type: 'Positive Parent Coach',
+    name: 'Positive Parent Coach',
+    emoji: '🌟',
+    description: 'Focused on helping parents be better role models and supporters',
+    tone: 'Empathetic and educational, understanding but clear about healthy boundaries, emphasizes growth mindset and positive reinforcement',
+    style: 'Teaches parents how to support without pressure, encourages process over outcomes, models healthy communication, "Your words shape their love of the game"',
+    specialization: [
+      'Positive reinforcement techniques',
+      'Role modeling behavior and sportsmanship',
+      'Managing parental expectations and pressure',
+      'Constructive vs. destructive feedback',
+      'Building intrinsic motivation in young athletes',
+      'Creating safe, supportive environments',
+      'Recognizing signs of burnout and stress',
+      'Parent-coach communication',
+      'Celebrating effort and growth over scores',
+      'USBC Parent\'s Guide to Misconduct in Sport principles'
+    ],
+  },
+  {
+    type: 'Reddit Community',
+    name: 'Reddit Community Voice',
+    emoji: '🗣️',
+    description: 'Authentic community-driven discussions',
+    tone: 'Conversational and authentic, values genuine discussion over polished marketing, respects the community culture',
+    style: 'Informative long-form posts, encourages discussion and questions, references personal experience, acknowledges different viewpoints, "Fellow bowler here..."',
+    specialization: [
+      'Long-form educational content',
+      'Community discussion facilitation',
+      'Answering technical questions',
+      'Sharing experiences and insights',
+      'Product/equipment reviews and recommendations',
+      'Debate and constructive discussion',
+      'Resource sharing and documentation',
+      'Subreddit culture and etiquette'
+    ],
+  },
 ];
 
 export const BOWLING_RESOURCES = {
@@ -142,6 +180,8 @@ export const BOWLING_RESOURCES = {
   intermediateCoaching: 'https://bowl.com/coaching/intermediate/',
   advancedCoaching: 'https://bowl.com/coaching/advanced/',
   physicalFitness: 'https://images.bowl.com/bowl/media/legacy/internap/bowl/coaching/pdfs/Physical_Fitness.pdf',
+  youthAthleteTraining: 'https://bowl.com/athlete-safety-rvp/youth-athlete-training-courses',
+  youthLeaders: 'https://bowl.com/youth/youth-leaders',
 };
 
 export const generateCoachPrompt = (
@@ -300,6 +340,25 @@ Guidelines for your posts:
 - Hashtags: 1-2 MAX (Twitter hates hashtag spam)
 - Each tweet should work standalone BUT flow as a thread\n`;
         break;
+      case 'reddit':
+        platformGuidelines = `\n\n🗣️ REDDIT FORMATTING REQUIREMENTS:
+- **CRITICAL: Reddit values authenticity over polish - avoid sounding like marketing**
+- Title: Clear, informative, maybe slightly casual (separate from body)
+- Opening: Acknowledge you're a coach/bowler sharing knowledge, establish credibility humbly
+- Structure: Use proper Reddit formatting:
+  * **Bold** for section headers or key terms
+  * Bullet points with * or - for lists
+  * Numbered lists for sequential steps (1. 2. 3.)
+  * Blank lines between paragraphs (double line break)
+  * > Quote blocks for emphasis or citations
+- Length: 300-600 words (Reddit appreciates depth and thoroughness)
+- Tone: Conversational but informative, like you're genuinely helping
+- Emojis: Use sparingly (1-3 max) - Reddit culture prefers text
+- End with: "Happy to answer questions!" or similar to encourage discussion
+- NO hashtags (Reddit doesn't use them)
+- Include TL;DR at top or bottom for longer posts
+- Be ready for follow-up questions and discussion in comments\n`;
+        break;
     }
   }
 
@@ -410,6 +469,43 @@ Reformat this post for X/Twitter with these requirements:
 
 PRESERVE: Technical accuracy, specific recommendations, coaching expertise
 ADJUST: Break content into 280-character chunks, tighten language
+
+Previous post:\n${previousContent}\n`;
+        break;
+      case 'reddit':
+        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - REDDIT OPTIMIZATION:
+
+IMPORTANT: MAINTAIN your persona's expertise and authority. You're reformatting for Reddit culture, NOT changing your coaching knowledge.
+
+Reformat this post for Reddit with these requirements:
+
+1. **Authenticity First:** Reddit detects and rejects marketing-speak
+   - Open humbly: "Fellow bowler here" or "High school coach sharing some insights"
+   - Be genuinely helpful, not promotional
+   - Acknowledge you're not claiming to know everything
+
+2. **Reddit Formatting:**
+   - Use **bold** for section headers and key terms
+   - Use bullet points (* or -) for lists
+   - Use numbered lists (1. 2. 3.) for sequential steps
+   - Double line breaks between paragraphs
+   - > Quote blocks for important callouts
+
+3. **Content Structure:**
+   - Start with context/credentials (brief and humble)
+   - Main content: thorough and detailed (300-600 words)
+   - Include TL;DR at top or bottom
+   - End with: "Happy to answer questions!" or similar
+
+4. **Tone & Style:**
+   - Conversational but informative
+   - Technical details are welcomed (Redditors appreciate depth)
+   - Emojis: 1-3 MAX (Reddit prefers text-based communication)
+   - NO hashtags (Reddit doesn't use them)
+   - Encourage discussion and questions
+
+PRESERVE: All technical expertise, specific recommendations, detailed explanations
+ADJUST: Format for Reddit markdown, adopt authentic community voice, encourage discussion
 
 Previous post:\n${previousContent}\n`;
         break;

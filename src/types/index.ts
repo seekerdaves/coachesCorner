@@ -21,11 +21,13 @@ export type CoachPersonaType =
   | 'Recreational Social'
   | 'Tech Data Enthusiast'
   | 'USBC Gold Coach'
-  | 'Ball Driller Expert';
+  | 'Ball Driller Expert'
+  | 'Positive Parent Coach'
+  | 'Reddit Community';
 
-export type PlatformFormat = 'standard' | 'facebook' | 'instagram' | 'twitter';
+export type PlatformFormat = 'standard' | 'facebook' | 'instagram' | 'twitter' | 'reddit';
 
-export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality' | 'facebook' | 'instagram' | 'twitter';
+export type RegenerateStyle = 'shorter' | 'nicer' | 'hipper' | 'change-personality' | 'facebook' | 'instagram' | 'twitter' | 'reddit';
 
 export interface Resource {
   id: string;
