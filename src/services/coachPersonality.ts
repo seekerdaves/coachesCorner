@@ -304,60 +304,56 @@ Guidelines for your posts:
   if (platformFormat && platformFormat !== 'standard') {
     switch (platformFormat) {
       case 'facebook':
-        platformGuidelines = `\n\n📘 FACEBOOK FORMATTING REQUIREMENTS:
-- **CRITICAL: First 120-140 characters are shown before "See More..."**
-- Start with a POWERFUL HOOK that makes scrolling impossible
-- Front-load your key insight/value in those first 120-140 characters
-- Use 1-2 emojis in the hook for visual appeal
-- After the hook: expand with your full expertise
-- Structure: Hook → Line break → Detailed content → CTA
-- Keep paragraphs short (1-2 sentences) for mobile readability
-- Total length: 180-250 words
+        platformGuidelines = `\n\n📘 FACEBOOK FORMATTING:
+- Write a complete, engaging post in 150-200 words
+- First sentence should hook readers immediately with value
+- Use 3-5 emojis strategically throughout
+- Short paragraphs (1-2 sentences) for mobile readability
+- Include your key insight or tip clearly
+- End with an engaging question to drive comments
 - Hashtags: 3-5 at the end
-- End with an engaging question to drive comments\n`;
+- Focus on conversational, shareable content\n`;
         break;
       case 'instagram':
-        platformGuidelines = `\n\n📸 INSTAGRAM FORMATTING REQUIREMENTS:
-- **CRITICAL: First ~125 characters shown before "more"**
-- Make first line visually pop with emojis (5-8 total in post)
+        platformGuidelines = `\n\n📸 INSTAGRAM FORMATTING:
+- Keep post concise: 120-180 words maximum
+- Make first line attention-grabbing and valuable
+- Use 5-8 emojis for visual appeal
 - Use • bullets or emoji bullets for key points
 - Short, scannable sentences with strategic line breaks
 - Visual hierarchy is key - make it aesthetically pleasing
-- Length: 150-220 words
 - Hashtags: 8-12 at the end (Instagram loves hashtags)
-- CTA: "Save this," "Share with a bowling friend," or "Tag someone who needs this"
-- Think visual appeal + substance\n`;
+- End with: "Save this," "Share with a friend," or "Tag someone who needs this"
+- Focus on visual appeal + substance\n`;
         break;
       case 'twitter':
-        platformGuidelines = `\n\n𝕏 TWITTER/X THREAD FORMATTING REQUIREMENTS:
-- **Format as a THREAD of 2-4 tweets**
-- Each tweet MUST be under 280 characters
-- Tweet 1: Hook + key insight (make it strong - this stands alone)
-- Tweet 2-3: Expand with details/tips (distribute your expertise across tweets)
+        platformGuidelines = `\n\n𝕏 TWITTER/X THREAD FORMAT:
+- Create a thread of 2-4 tweets
+- Each tweet must be under 280 characters
+- Tweet 1: Hook + key insight (this stands alone)
+- Tweet 2-3: Expand with details/tips
 - Final tweet: Call-to-action question
-- Use 1-2 emojis per tweet (not excessive)
-- Number tweets: "1/3", "2/3", "3/3" OR use 🧵 at start
-- Hashtags: 1-2 MAX (Twitter hates hashtag spam)
-- Each tweet should work standalone BUT flow as a thread\n`;
+- Use 1-2 emojis per tweet
+- Number tweets: "1/3", "2/3", "3/3" OR use 🧵 emoji
+- Hashtags: 1-2 maximum
+- Each tweet works standalone but flows as a thread\n`;
         break;
       case 'reddit':
-        platformGuidelines = `\n\n🗣️ REDDIT FORMATTING REQUIREMENTS:
-- **CRITICAL: Reddit values authenticity over polish - avoid sounding like marketing**
-- Title: Clear, informative, maybe slightly casual (separate from body)
-- Opening: Acknowledge you're a coach/bowler sharing knowledge, establish credibility humbly
-- Structure: Use proper Reddit formatting:
+        platformGuidelines = `\n\n🗣️ REDDIT FORMATTING:
+- Write authentic, helpful content (300-500 words)
+- Avoid marketing-speak - be genuine
+- Open humbly: establish credibility without bragging
+- Use Reddit markdown formatting:
   * **Bold** for section headers or key terms
   * Bullet points with * or - for lists
-  * Numbered lists for sequential steps (1. 2. 3.)
-  * Blank lines between paragraphs (double line break)
-  * > Quote blocks for emphasis or citations
-- Length: 300-600 words (Reddit appreciates depth and thoroughness)
-- Tone: Conversational but informative, like you're genuinely helping
-- Emojis: Use sparingly (1-3 max) - Reddit culture prefers text
-- End with: "Happy to answer questions!" or similar to encourage discussion
+  * Numbered lists (1. 2. 3.) for sequential steps
+  * Double line breaks between paragraphs
+  * > Quote blocks for emphasis
+- Conversational but informative tone
+- Emojis: 1-3 maximum (Reddit culture prefers text)
+- End with: "Happy to answer questions!" to encourage discussion
 - NO hashtags (Reddit doesn't use them)
-- Include TL;DR at top or bottom for longer posts
-- Be ready for follow-up questions and discussion in comments\n`;
+- Include TL;DR at top or bottom\n`;
         break;
     }
   }
@@ -378,134 +374,75 @@ Guidelines for your posts:
         regenerateInstruction = `\n\nREGENERATE INSTRUCTION: Rewrite this previous post in your own distinct voice and personality. Keep the core message but express it in your unique style.\n\nPrevious post:\n${previousContent}\n`;
         break;
       case 'facebook':
-        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - FACEBOOK OPTIMIZATION:
+        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - FACEBOOK FORMAT:
 
-IMPORTANT: MAINTAIN your persona's voice and expertise level. You're reformatting for platform, NOT changing who you are as a coach.
+Rewrite this post optimized for Facebook (150-200 words):
 
-Reformat this post for Facebook with these CRITICAL requirements:
+1. **Keep your persona's voice and expertise** - just adapt the format
+2. **Start strong** - first sentence should immediately deliver value
+3. **Short paragraphs** - 1-2 sentences each for mobile reading
+4. **Use 3-5 emojis** strategically throughout
+5. **End with a question** to drive comments
+6. **Add 3-5 hashtags** at the end
 
-1. **OPENING HOOK (First 120-140 characters):** Front-load your most compelling message here. This appears before "See More..." on mobile.
-   - Use a powerful question, bold statement, or intriguing fact IN YOUR PERSONA'S VOICE
-   - Include 1-2 emojis for visual appeal
-   - Make it impossible to scroll past
-   - Keep your coaching expertise and authority - just condense it
-
-2. **Structure:**
-   - Line 1-2: Powerful hook (120-140 chars max) - FRONT LOAD THE KEY VALUE/INSIGHT
-   - Line break
-   - Line 3+: Expand with your expert details for those who click "See More"
-   - Maintain all technical depth and specificity from original
-   - End: Strong call-to-action question
-
-3. **Formatting:**
-   - Single line breaks between thoughts
-   - Short paragraphs (1-2 sentences max)
-   - 3-5 emojis total, strategically placed
-   - Mobile-first mindset
-
-4. **Length:** Adjust as needed to convey your message fully (don't sacrifice expertise for brevity)
-5. **Hashtags:** Keep relevant hashtags at the very end
-
-PRESERVE: Your expertise, technical details, recommendations, and coaching authority
-ADJUST: Only the structure to front-load value before "See More..."
+Make it conversational and shareable while keeping your coaching insights.
 
 Previous post:\n${previousContent}\n`;
         break;
       case 'instagram':
-        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - INSTAGRAM OPTIMIZATION:
+        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - INSTAGRAM FORMAT:
 
-IMPORTANT: MAINTAIN your persona's voice and expertise. You're reformatting for Instagram, NOT diluting your coaching knowledge.
+Rewrite this post optimized for Instagram (120-180 words max):
 
-Reformat this post for Instagram with these requirements:
+1. **Keep your persona's expertise** - just make it more visual
+2. **Strong opening line** that grabs attention immediately
+3. **Use 5-8 emojis** for visual appeal
+4. **Use bullets** (• or emoji bullets) for key points
+5. **Short, punchy sentences** with strategic line breaks
+6. **Add 8-12 hashtags** at the end
+7. **End with CTA:** "Save this," "Share," or "Tag a friend"
 
-1. **First Line Hook:** Grab attention immediately (Instagram shows ~125 characters before "more")
-   - Use emojis (5-8 total) IN YOUR PERSONA'S STYLE
-   - Make first sentence pop visually while maintaining authority
-   - Question or bold statement that reflects your expertise
-
-2. **Formatting:**
-   - Use • bullets or emojis as bullets
-   - Short, punchy sentences BUT keep technical details
-   - Strategic line breaks for visual hierarchy
-   - Visual appeal + substantive content
-
-3. **Length:** Adjust as needed to preserve your coaching value (don't sacrifice key insights)
-4. **Hashtags:** 8-12 hashtags at the end (Instagram allows more)
-5. **Call-to-action:** Ask to save, share, or tag a bowling friend
-
-PRESERVE: Your technical expertise, specific recommendations, coaching depth
-ADJUST: Visual formatting, emoji usage, line breaks for Instagram aesthetics
+Make it visually appealing while keeping your coaching insights clear.
 
 Previous post:\n${previousContent}\n`;
         break;
       case 'twitter':
-        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - X (TWITTER) OPTIMIZATION:
+        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - TWITTER/X THREAD:
 
-IMPORTANT: MAINTAIN your persona's authority and expertise. You're condensing for Twitter, NOT oversimplifying your coaching.
+Rewrite this as a Twitter/X thread (2-4 tweets):
 
-Reformat this post for X/Twitter with these requirements:
+1. **Keep your persona's expertise** - distribute it across tweets
+2. **Tweet 1:** Hook + key insight (under 280 chars)
+3. **Tweet 2-3:** Expand with details/tips (under 280 chars each)
+4. **Final tweet:** Call-to-action question (under 280 chars)
+5. **Number tweets:** 1/3, 2/3, 3/3 OR use 🧵
+6. **Use 1-2 emojis per tweet**
+7. **Add 1-2 hashtags maximum**
 
-1. **Thread Format:** Break into 2-4 connected tweets
-   - Tweet 1: Hook + key insight (280 chars max) IN YOUR VOICE
-   - Tweet 2-3: Expand with your expert details or tips
-   - Final tweet: Call-to-action
-   - Keep technical terminology and specifics across the thread
-
-2. **Each Tweet:**
-   - Must be under 280 characters
-   - Front-load the value in each tweet
-   - Use 1-2 emojis per tweet (not excessive)
-   - Make each tweet work standalone but flow together
-   - Don't lose your expertise - just distribute it across tweets
-
-3. **Formatting:**
-   - Number tweets (1/3, 2/3, 3/3) OR use 🧵 thread emoji
-   - Short, punchy sentences
-   - No wasted words BUT keep key details
-   - Strategic line breaks within tweets
-
-4. **Hashtags:** 1-2 hashtags MAX (Twitter users don't like hashtag spam)
-5. **Engagement:** End with a question to drive replies
-
-PRESERVE: Technical accuracy, specific recommendations, coaching expertise
-ADJUST: Break content into 280-character chunks, tighten language
+Each tweet should work standalone but flow together as a thread.
 
 Previous post:\n${previousContent}\n`;
         break;
       case 'reddit':
-        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - REDDIT OPTIMIZATION:
+        regenerateInstruction = `\n\nREGENERATE INSTRUCTION - REDDIT FORMAT:
 
-IMPORTANT: MAINTAIN your persona's expertise and authority. You're reformatting for Reddit culture, NOT changing your coaching knowledge.
+Rewrite this post optimized for Reddit (300-500 words):
 
-Reformat this post for Reddit with these requirements:
-
-1. **Authenticity First:** Reddit detects and rejects marketing-speak
-   - Open humbly: "Fellow bowler here" or "High school coach sharing some insights"
-   - Be genuinely helpful, not promotional
-   - Acknowledge you're not claiming to know everything
-
-2. **Reddit Formatting:**
-   - Use **bold** for section headers and key terms
-   - Use bullet points (* or -) for lists
-   - Use numbered lists (1. 2. 3.) for sequential steps
+1. **Keep your persona's expertise** - Reddit appreciates depth
+2. **Open authentically:** Establish credibility humbly (no marketing-speak)
+3. **Use Reddit markdown:**
+   - **Bold** for headers/key terms
+   - Bullet points (* or -) for lists
+   - Numbered lists (1. 2. 3.) for steps
    - Double line breaks between paragraphs
-   - > Quote blocks for important callouts
+   - > Quote blocks for emphasis
+4. **Conversational tone** - be genuinely helpful
+5. **Use 1-3 emojis maximum** (Reddit prefers text)
+6. **NO hashtags** (Reddit doesn't use them)
+7. **Include TL;DR** at top or bottom
+8. **End with:** "Happy to answer questions!"
 
-3. **Content Structure:**
-   - Start with context/credentials (brief and humble)
-   - Main content: thorough and detailed (300-600 words)
-   - Include TL;DR at top or bottom
-   - End with: "Happy to answer questions!" or similar
-
-4. **Tone & Style:**
-   - Conversational but informative
-   - Technical details are welcomed (Redditors appreciate depth)
-   - Emojis: 1-3 MAX (Reddit prefers text-based communication)
-   - NO hashtags (Reddit doesn't use them)
-   - Encourage discussion and questions
-
-PRESERVE: All technical expertise, specific recommendations, detailed explanations
-ADJUST: Format for Reddit markdown, adopt authentic community voice, encourage discussion
+Make it authentic community discussion, not a marketing post.
 
 Previous post:\n${previousContent}\n`;
         break;
